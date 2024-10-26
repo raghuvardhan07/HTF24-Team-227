@@ -14,17 +14,20 @@ datasource db {
 }
 
 model Course {
-  courseId          String   @id @default(auto()) @map("_id") @db.ObjectId
+  courseId          String       @id @default(auto()) @map("_id") @db.ObjectId
   courseName        String
   courseDescription String
-  studentId         String[] @db.ObjectId
-  teacherId         String   @db.ObjectId
-  teacher           Teacher  @relation(fields: [teacherId], references: [id])
-  student           Student  @relation(fields: [studentId], references: [id])
+  studentId         String[]     @db.ObjectId
+  teacherId         String       @db.ObjectId
+  videos            Video[]
+  teacher           Teacher      @relation(fields: [teacherId], references: [id])
+  student           Student      @relation(fields: [studentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignments       Assignment[]
+  quiz              Quiz[]
 }
 
 model Student {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
   studentName  String
   studentAge   Int
   phoneno      BigInt
@@ -32,6 +35,8 @@ model Student {
   password     String
   courses      Course[]
   profilePhoto String?
+  submissionId String     @unique @db.ObjectId
+  submission   Submission @relation(fields: [submissionId], references: [id])
 }
 
 model Teacher {
@@ -43,4 +48,37 @@ model Teacher {
   password     String
   courses      Course[]
   profilePhoto String?
+}
+
+model Video {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  description String
+  url         String
+  courseId    String @db.ObjectId
+  course      Course @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+}
+
+model Assignment {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  url         String
+  courseId    String       @db.ObjectId
+  course      Course       @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+  deadline    DateTime
+  submissions Submission[]
+}
+
+model Submission {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  assignmentId String     @db.ObjectId
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  student      Student?
+  url          String
+}
+
+model Quiz {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  courseId String @db.ObjectId
+  course   Course @relation(fields: [courseId], references: [courseId])
 }

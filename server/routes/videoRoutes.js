@@ -1,26 +1,29 @@
 const router = require("express").Router();
 const prisma = require("../src/utils/prisma");
 
-// Basic CRUD
 router.post("/upload", upload.single("video"), async (req, res) => {
-    const { title, description } = req.body;
-    const { path: cloudinaryUrl, filename: publicId } = req.file;
+    const { title, description, courseId } = req.body;
+    const cloudinaryUrl = req.file.path;
+    const publicId = req.file.filename;
 
     try {
         const video = await prisma.video.create({
             data: {
+                id: publicId,
                 title,
                 description,
-                cloudinaryUrl,
-                publicId,
+                url: cloudinaryUrl,
+                courseId,
             },
         });
 
         res.status(201).json({
             message: "Video uploaded and metadata stored successfully",
-            videoId: result.insertId,
+            video: video,
         });
     } catch (error) {
         res.status(500).json({ error: "Failed to store video metadata" });
     }
 });
+
+module.exports = router;

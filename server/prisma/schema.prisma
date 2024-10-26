@@ -24,6 +24,8 @@ model Course {
   student           Student      @relation(fields: [studentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   assignments       Assignment[]
   quiz              Quiz[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 }
 
 model Student {
@@ -37,6 +39,8 @@ model Student {
   profilePhoto String?
   submissionId String     @unique @db.ObjectId
   submission   Submission @relation(fields: [submissionId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model Teacher {
@@ -48,14 +52,19 @@ model Teacher {
   password     String
   courses      Course[]
   profilePhoto String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Video {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
   description String
   url         String
-  courseId    String @db.ObjectId
-  course      Course @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+  courseId    String   @db.ObjectId
+  course      Course   @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Assignment {
@@ -66,6 +75,8 @@ model Assignment {
   course      Course       @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
   deadline    DateTime
   submissions Submission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Submission {
@@ -74,11 +85,15 @@ model Submission {
   assignment   Assignment @relation(fields: [assignmentId], references: [id])
   student      Student?
   url          String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model Quiz {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
-  courseId String @db.ObjectId
-  course   Course @relation(fields: [courseId], references: [courseId])
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  courseId  String   @db.ObjectId
+  course    Course   @relation(fields: [courseId], references: [courseId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

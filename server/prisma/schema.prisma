@@ -31,7 +31,7 @@ model Student {
   studentName  String
   studentAge   Int
   phoneno      BigInt
-  email        String
+  email        String     @unique
   password     String
   courses      Course[]
   profilePhoto String?
@@ -44,7 +44,7 @@ model Teacher {
   teacherName  String
   teacherAge   Int
   phoneno      BigInt
-  email        String
+  email        String   @unique
   password     String
   courses      Course[]
   profilePhoto String?

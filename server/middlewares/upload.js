@@ -1,3 +1,7 @@
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
+
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
@@ -5,5 +9,5 @@ const storage = new CloudinaryStorage({
         resource_type: "video",
     },
 });
-
-export const upload = multer({ storage });
+const upload = multer({ storage });
+module.exports = upload;

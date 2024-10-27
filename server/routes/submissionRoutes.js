@@ -1,31 +1,7 @@
 const router = require("express").Router();
-const prisma = require("../src/utils/prisma"); 
+const prisma = require("../src/utils/prisma");
 
-// Create a new submission
-router.post("/create", async (req, res) => {
-    const { assignmentId, studentId, url } = req.body;
-
-    try {
-        // Create a new submission and associate it with an assignment and student
-        const newSubmission = await prisma.submission.create({
-            data: {
-                assignmentId,
-                student: {
-                    connect: { id: studentId } // Connect the submission to the student
-                },
-                url
-            }
-        });
-
-        res.status(201).json({
-            message: "Submission created successfully",
-            submission: newSubmission
-        });
-    } catch (error) {
-        console.error("Error creating submission:", error);
-        res.status(500).json({ error: "Failed to create submission" });
-    }
-});
+// Create is handled at /assignment router
 
 // Get all submissions
 router.get("/", async (req, res) => {
@@ -33,8 +9,8 @@ router.get("/", async (req, res) => {
         const submissions = await prisma.submission.findMany({
             include: {
                 assignment: true, // Include assignment details
-                student: true     // Include student details
-            }
+                student: true, // Include student details
+            },
         });
 
         res.status(200).json(submissions);
@@ -53,8 +29,8 @@ router.get("/:id", async (req, res) => {
             where: { id },
             include: {
                 assignment: true, // Include assignment details
-                student: true     // Include student details
-            }
+                student: true, // Include student details
+            },
         });
 
         if (!submission) {
@@ -78,13 +54,13 @@ router.put("/update/:id", async (req, res) => {
             where: { id },
             data: {
                 url,
-                updatedAt: new Date()
-            }
+                updatedAt: new Date(),
+            },
         });
 
         res.status(200).json({
             message: "Submission updated successfully",
-            submission: updatedSubmission
+            submission: updatedSubmission,
         });
     } catch (error) {
         console.error("Error updating submission:", error);
@@ -98,7 +74,7 @@ router.delete("/delete/:id", async (req, res) => {
 
     try {
         await prisma.submission.delete({
-            where: { id }
+            where: { id },
         });
 
         res.status(200).json({ message: "Submission deleted successfully" });

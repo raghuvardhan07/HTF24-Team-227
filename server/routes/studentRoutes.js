@@ -1,9 +1,9 @@
 const router = require("express").Router();
-const prisma = require("../src/utils/prisma"); // Import Prisma from your utils folder
+const prisma = require("../src/utils/prisma");
 
 // Create a new student
 router.post("/create", async (req, res) => {
-    const { studentName, studentAge, phoneno, email, password, profilePhoto } = req.body;
+    const { studentName, studentAge, phoneno, email, password } = req.body;
 
     try {
         // Create a new student
@@ -14,13 +14,12 @@ router.post("/create", async (req, res) => {
                 phoneno,
                 email,
                 password,
-                profilePhoto,
-            }
+            },
         });
 
         res.status(201).json({
             message: "Student created successfully",
-            student: newStudent
+            student: newStudent,
         });
     } catch (error) {
         console.error("Error creating student:", error);
@@ -68,32 +67,23 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update a student by ID
-router.put("/update/:id", async (req, res) => {
-    const { id } = req.params;
-    const { studentName, studentAge, phoneno, email, password, profilePhoto } = req.body;
-
-    try {
-        const updatedStudent = await prisma.student.update({
-            where: { id },
-            data: {
-                studentName,
-                studentAge,
-                phoneno,
-                email,
-                password,
-                profilePhoto,
-                updatedAt: new Date()
-            }
-        });
-
-        res.status(200).json({
-            message: "Student updated successfully",
-            student: updatedStudent
-        });
-    } catch (error) {
-        console.error("Error updating student:", error);
-        res.status(500).json({ error: "Failed to update student" });
+router.patch("/:id", async (req, res) => {
+    const id = req.params.id;
+    const newData = req.body;
+    const student = await prisma.teacher.findUnique({
+        where: {
+            id: id,
+        },
+    });
+    if (!student) {
+        return res.status(404).json({ message: "Teacher not found" });
     }
+    const updatedStudent = await prisma.student.update({
+        where: { id: id },
+        data: newData,
+    });
+
+    return res.status(200).json(updatedStudent);
 });
 
 // Delete a student by ID
@@ -102,7 +92,7 @@ router.delete("/delete/:id", async (req, res) => {
 
     try {
         await prisma.student.delete({
-            where: { id }
+            where: { id },
         });
 
         res.status(200).json({ message: "Student deleted successfully" });

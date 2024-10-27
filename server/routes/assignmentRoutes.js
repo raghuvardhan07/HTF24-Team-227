@@ -55,4 +55,48 @@ router.post("/submit", upload.single("pdf"), async (req, res) => {
     }
 });
 
+router.get("/:id/submissions", async (req, res) => {
+    const id = req.params.id;
+    try {
+        const submissions = await prisma.submission.findMany({
+            where: {
+                assignment: {
+                    id: id,
+                },
+            },
+            include: {
+                student: true,
+                assignment: true,
+            },
+        });
+        res.status(200).json({ submissions: submissions });
+    } catch (error) {
+        console.error("Error retreiving submission:", error);
+        res.status(500).json({ error: "Failed to store submission metadata" });
+    }
+});
+
+router.get("/:id/submission/:subId", async (req, res) => {
+    const id = req.params.id;
+    const subId = req.params.subId;
+    try {
+        const submission = await prisma.submission.findOne({
+            where: {
+                id: subId,
+                assignment: {
+                    id: id,
+                },
+            },
+            include: {
+                student: true,
+                assignment: true,
+            },
+        });
+        res.status(200).json({ submission: submission });
+    } catch (error) {
+        console.error("Error retreiving submission:", error);
+        res.status(500).json({ error: "Failed to store submission metadata" });
+    }
+});
+
 module.exports = router;

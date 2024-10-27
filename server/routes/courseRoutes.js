@@ -2,7 +2,7 @@ const router = require("express").Router();
 const prisma = require("../src/utils/prisma");
 
 // Create a new course
-router.post("/create", async (req, res) => {
+router.post("/create", upload.single("jpg"), async (req, res) => {
     const {
         courseName,
         courseDescription,
@@ -10,12 +10,15 @@ router.post("/create", async (req, res) => {
         teacherId,
     } = req.body;
 
+    const cloudinaryUrl = req.file.path;
+
     try {
         // Create the course with relations to teacher and students
         const newCourse = await prisma.course.create({
             data: {
                 courseName,
                 courseDescription,
+                thubmnailUrl: cloudinaryUrl,
                 teacher: {
                     connect: { id: teacherId }, // Associate with an existing teacher
                 },

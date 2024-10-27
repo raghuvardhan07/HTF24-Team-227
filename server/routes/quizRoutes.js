@@ -1,24 +1,25 @@
 const router = require("express").Router();
-const prisma = require("../src/utils/prisma"); // Import Prisma from your utils folder
+const prisma = require("../src/utils/prisma");
 
 // Create a new quiz
 router.post("/create", async (req, res) => {
-    const { name, courseId } = req.body;
+    const { name, courseId, questionAnswers } = req.body;
 
     try {
         // Create a new quiz and associate it with a course
         const newQuiz = await prisma.quiz.create({
             data: {
                 name,
+                questionAnswers, // Map
                 course: {
                     connect: { courseId }, // Connect the quiz to the course
-                }
-            }
+                },
+            },
         });
 
         res.status(201).json({
             message: "Quiz created successfully",
-            quiz: newQuiz
+            quiz: newQuiz,
         });
     } catch (error) {
         console.error("Error creating quiz:", error);
@@ -31,8 +32,8 @@ router.get("/", async (req, res) => {
     try {
         const quizzes = await prisma.quiz.findMany({
             include: {
-                course: true // Include course details
-            }
+                course: true, // Include course details
+            },
         });
 
         res.status(200).json(quizzes);
@@ -50,8 +51,8 @@ router.get("/:id", async (req, res) => {
         const quiz = await prisma.quiz.findUnique({
             where: { id },
             include: {
-                course: true // Include course details
-            }
+                course: true, // Include course details
+            },
         });
 
         if (!quiz) {
@@ -68,20 +69,21 @@ router.get("/:id", async (req, res) => {
 // Update a quiz by ID
 router.put("/update/:id", async (req, res) => {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, questionAnswers } = req.body;
 
     try {
         const updatedQuiz = await prisma.quiz.update({
             where: { id },
             data: {
                 name,
-                updatedAt: new Date()
-            }
+                questionAnswers,
+                updatedAt: new Date(),
+            },
         });
 
         res.status(200).json({
             message: "Quiz updated successfully",
-            quiz: updatedQuiz
+            quiz: updatedQuiz,
         });
     } catch (error) {
         console.error("Error updating quiz:", error);
@@ -95,7 +97,7 @@ router.delete("/delete/:id", async (req, res) => {
 
     try {
         await prisma.quiz.delete({
-            where: { id }
+            where: { id },
         });
 
         res.status(200).json({ message: "Quiz deleted successfully" });

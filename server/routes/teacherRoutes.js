@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 
 // Basic CRUD
 router.post("/create", async (req, res) => {
-    const { teacherName, teacherAge, phoneno, email, password } = req.body;
+    const { name, age, phone, email, password } = req.body;
     // Courses is ommited becoz during creation of Teacher account there are no courses of them
     const exists = await prisma.teacher.findUnique({
         where: {
@@ -16,9 +16,9 @@ router.post("/create", async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const teacher = await prisma.student.create({
-        teacherName,
-        teacherAge,
-        phoneno,
+        teacherName: name,
+        teacherAge: age,
+        phoneno: phone,
         email,
         hashedPassword,
     });

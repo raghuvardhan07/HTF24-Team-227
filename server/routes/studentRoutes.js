@@ -4,16 +4,16 @@ const bcrypt = require("bcrypt");
 
 // Create a new student
 router.post("/create", async (req, res) => {
-    const { studentName, studentAge, phoneno, email, password } = req.body;
+    const { name, age, phone, email, password } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newStudent = await prisma.student.create({
             data: {
-                studentName,
-                studentAge,
-                phoneno,
+                studentName: name,
+                studentAge: age,
+                phoneno: phone,
                 email,
                 hashedPassword,
             },

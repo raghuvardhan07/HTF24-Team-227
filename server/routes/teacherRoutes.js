@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const prisma = require("../src/utils/prisma");
+const bcrypt = require("bcrypt");
 
 // Basic CRUD
 router.post("/create", async (req, res) => {
@@ -13,13 +14,14 @@ router.post("/create", async (req, res) => {
     if (exists) {
         return res.status(400).json({ message: "Teacher already exists" });
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
     const teacher = await prisma.student.create({
         id,
         teacherName,
         teacherAge,
         phoneno,
         email,
-        password,
+        hashedPassword,
     });
 
     return res.status(201).json(id);

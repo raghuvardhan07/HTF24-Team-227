@@ -1,11 +1,13 @@
 const router = require("express").Router();
 const prisma = require("../src/utils/prisma");
+const bcrypt = require("bcrypt");
 
 // Create a new student
 router.post("/create", async (req, res) => {
     const { studentName, studentAge, phoneno, email, password } = req.body;
 
     try {
+        const hashedPassword = await bcrypt.hash(password, 10);
         // Create a new student
         const newStudent = await prisma.student.create({
             data: {
@@ -13,7 +15,7 @@ router.post("/create", async (req, res) => {
                 studentAge,
                 phoneno,
                 email,
-                password,
+                hashedPassword,
             },
         });
 

@@ -4,11 +4,11 @@ const bcrypt = require("bcrypt");
 
 // Basic CRUD
 router.post("/create", async (req, res) => {
-    const { id, teacherName, teacherAge, phoneno, email, password } = req.body;
+    const { teacherName, teacherAge, phoneno, email, password } = req.body;
     // Courses is ommited becoz during creation of Teacher account there are no courses of them
     const exists = await prisma.teacher.findUnique({
         where: {
-            id: id,
+            email: email,
         },
     });
     if (exists) {
@@ -16,7 +16,6 @@ router.post("/create", async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const teacher = await prisma.student.create({
-        id,
         teacherName,
         teacherAge,
         phoneno,
@@ -24,7 +23,7 @@ router.post("/create", async (req, res) => {
         hashedPassword,
     });
 
-    return res.status(201).json(id);
+    return res.status(201).json(teacher.id);
 });
 
 router.get("/:id", async (req, res) => {
@@ -72,6 +71,27 @@ router.delete("/:id", async (req, res) => {
     const deletedTeacher = await prisma.teacher.delete({ where: { id: id } });
 
     return res.status(200).json(deletedTeacher);
+});
+
+router.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    const teacher = await prisma.teacher.findUnique({
+        where: {
+            email: email,
+        },
+    });
+    if (!teacher) {
+        return res.status(400).json({ message: "Teacher not found" });
+    }
+    const comp = await bcrypt.compare(password, teacher.hashedPassword);
+    if (!comp) {
+        return res.status(400).json({ message: "Wrong password" });
+    }
+    const token = jwt.sign(student.id, process.env.JWT_SECRET);
+    return res
+        .status(200)
+        .cookie("token", token, { httpOnly: true })
+        .json({ message: "Logged in successfully" });
 });
 
 module.exports = router;

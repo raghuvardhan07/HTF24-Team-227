@@ -8,7 +8,7 @@ router.post("/create", async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        // Create a new student
+
         const newStudent = await prisma.student.create({
             data: {
                 studentName,
@@ -102,6 +102,27 @@ router.delete("/delete/:id", async (req, res) => {
         console.error("Error deleting student:", error);
         res.status(500).json({ error: "Failed to delete student" });
     }
+});
+
+router.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    const student = await prisma.student.findUnique({
+        where: {
+            email: email,
+        },
+    });
+    if (!student) {
+        return res.status(400).json({ message: "Student not found" });
+    }
+    const comp = await bcrypt.compare(password, student.hashedPassword);
+    if (!comp) {
+        return res.status(400).json({ message: "Wrong password" });
+    }
+    const token = jwt.sign(student.id, process.env.JWT_SECRET);
+    return res
+        .status(200)
+        .cookie("token", token, { httpOnly: true })
+        .json({ message: "Logged in successfully" });
 });
 
 module.exports = router;

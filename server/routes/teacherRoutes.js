@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const prisma = require("../src/utils/prisma");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const authMiddleware = require("../middlewares/auth");
 
 // Basic CRUD
 router.post("/create", async (req, res) => {
@@ -15,18 +17,20 @@ router.post("/create", async (req, res) => {
         return res.status(400).json({ message: "Teacher already exists" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const teacher = await prisma.student.create({
-        teacherName: name,
-        teacherAge: age,
-        phoneno: phone,
-        email,
-        hashedPassword,
+    const teacher = await prisma.teacher.create({
+        data: {
+            teacherName: name,
+            teacherAge: Number(age),
+            phoneno: Number(phone),
+            email,
+            password: hashedPassword,
+        },
     });
 
     return res.status(201).json(teacher.id);
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
     const id = req.params.id;
     const teacher = await prisma.teacher.findUnique({
         where: {
@@ -39,7 +43,21 @@ router.get("/:id", async (req, res) => {
     return res.status(200).json(teacher);
 });
 
-router.patch("/:id", async (req, res) => {
+router.get("/:id/courses", authMiddleware, async (req, res) => {
+    const id = req.params.id;
+    // Find all courses corresponding to this particular teacher
+    const courses = await prisma.course.findMany({
+        where: {
+            teacherId: id, // Use the dynamic teacher ID from the request params
+        },
+        include: {
+            student: true, // Include student details related to the course
+        },
+    });
+    return res.status(200).json(courses);
+});
+
+router.patch("/:id", authMiddleware, async (req, res) => {
     const id = req.params.id;
     const newData = req.body;
     const teacher = await prisma.teacher.findUnique({
@@ -58,7 +76,7 @@ router.patch("/:id", async (req, res) => {
     return res.status(200).json(updatedTeacher);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     const id = req.params.id;
     const teacher = await prisma.teacher.findUnique({
         where: {
@@ -83,15 +101,16 @@ router.post("/login", async (req, res) => {
     if (!teacher) {
         return res.status(400).json({ message: "Teacher not found" });
     }
-    const comp = await bcrypt.compare(password, teacher.hashedPassword);
+    const comp = await bcrypt.compare(password, teacher.password);
     if (!comp) {
         return res.status(400).json({ message: "Wrong password" });
     }
-    const token = jwt.sign(student.id, process.env.JWT_SECRET);
+    const token = jwt.sign(teacher.id, process.env.JWT_SECRET);
+    console.log(token);
     return res
         .status(200)
-        .cookie("token", token, { httpOnly: true })
-        .json({ message: "Logged in successfully" });
+        .cookie("token", token, { httpOnly: true, sameSite: "lax", secure: false })
+        .json({ message: "Logged in successfully", teacherId: teacher.id });
 });
 
 module.exports = router;

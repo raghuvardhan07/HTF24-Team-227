@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const prisma = require("../src/utils/prisma");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const authMiddleware = require("../middlewares/auth");
 
 // Create a new student
 router.post("/create", async (req, res) => {
@@ -12,16 +14,16 @@ router.post("/create", async (req, res) => {
         const newStudent = await prisma.student.create({
             data: {
                 studentName: name,
-                studentAge: age,
-                phoneno: phone,
+                studentAge: Number(age),
+                phoneno: Number(phone),
                 email,
-                hashedPassword,
+                password: hashedPassword,
             },
         });
 
         res.status(201).json({
             message: "Student created successfully",
-            student: newStudent,
+            id: newStudent.id,
         });
     } catch (error) {
         console.error("Error creating student:", error);
@@ -46,7 +48,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get a specific student by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -69,7 +71,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update a student by ID
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", authMiddleware, async (req, res) => {
     const id = req.params.id;
     const newData = req.body;
     const student = await prisma.teacher.findUnique({
@@ -89,7 +91,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete a student by ID
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", authMiddleware, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -114,14 +116,14 @@ router.post("/login", async (req, res) => {
     if (!student) {
         return res.status(400).json({ message: "Student not found" });
     }
-    const comp = await bcrypt.compare(password, student.hashedPassword);
+    const comp = await bcrypt.compare(password, student.password);
     if (!comp) {
         return res.status(400).json({ message: "Wrong password" });
     }
     const token = jwt.sign(student.id, process.env.JWT_SECRET);
     return res
         .status(200)
-        .cookie("token", token, { httpOnly: true })
+        .cookie("token", token, { httpOnly: true, sameSite: "lax", secure: false })
         .json({ message: "Logged in successfully" });
 });
 

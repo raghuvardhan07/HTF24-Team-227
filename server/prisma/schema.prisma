@@ -22,7 +22,7 @@ model Course {
   teacherId         String       @db.ObjectId
   videos            Video[]
   teacher           Teacher      @relation(fields: [teacherId], references: [id])
-  student           Student      @relation(fields: [studentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  student           Student?     @relation(fields: [studentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   assignments       Assignment[]
   content           Content[]
   quiz              Quiz[]
@@ -31,18 +31,18 @@ model Course {
 }
 
 model Student {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
   studentName  String
   studentAge   Int
   phoneno      BigInt
-  email        String
+  email        String      @unique
   password     String
   courses      Course[]
   profilePhoto String?
-  submissionId String     @unique @db.ObjectId
-  submission   Submission @relation(fields: [submissionId], references: [id])
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  submissionId String?     @unique @db.ObjectId
+  submission   Submission? @relation(fields: [submissionId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model Teacher {
@@ -50,7 +50,7 @@ model Teacher {
   teacherName  String
   teacherAge   Int
   phoneno      BigInt
-  email        String
+  email        String   @unique
   password     String
   courses      Course[]
   profilePhoto String?

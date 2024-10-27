@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const teacherRoutes = require("./routes/teacherRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
@@ -22,7 +23,13 @@ cloudinary.config({
 const app = express();
 const port = process.env.PORT_NUMBER || 5000;
 
-app.use(cors());
+app.use(cookieParser());
+app.use(
+    cors({
+        origin: "http://localhost:5173", // React app URL
+        credentials: true, // Allow cookies
+    })
+);
 app.use(express.json());
 
 app.use("/teacher", teacherRoutes);

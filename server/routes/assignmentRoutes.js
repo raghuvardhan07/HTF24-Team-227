@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const prisma = require("../src/utils/prisma");
+const upload = require("../middlewares/upload");
 
 router.post("/create", upload.single("pdf"), async (req, res) => {
     const { name, courseId, deadline } = req.body;
@@ -52,6 +53,26 @@ router.post("/submit", upload.single("pdf"), async (req, res) => {
     } catch (error) {
         console.error("Error storing submission:", error);
         res.status(500).json({ error: "Failed to store submission metadata" });
+    }
+});
+
+// Gets one specific assignment details
+router.get("/:id", async (req, res) => {
+    const id = req.params.id;
+    try {
+        const assignment = await prisma.assignment.findOne({
+            where: {
+                id: id,
+            },
+            include: {
+                student: true,
+                assignment: true,
+            },
+        });
+        res.status(200).json({ assignment: assignment });
+    } catch (error) {
+        console.error("Error retreiving assignment:", error);
+        res.status(500).json({ error: "Failed to store assignment metadata" });
     }
 });
 

@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const prisma = require("../src/utils/prisma");
+const upload = require("../middlewares/upload");
 
 router.post("/upload", upload.single("video"), async (req, res) => {
     const { title, description, courseId } = req.body;

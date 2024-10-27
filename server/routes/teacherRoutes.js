@@ -2,7 +2,7 @@ const router = require("express").Router();
 const prisma = require("../src/utils/prisma");
 
 // Basic CRUD
-router.post("/", async (req, res) => {
+router.post("/create", async (req, res) => {
     const { id, teacherName, teacherAge, phoneno, email, password } = req.body;
     // Courses is ommited becoz during creation of Teacher account there are no courses of them
     const exists = await prisma.teacher.findUnique({
@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
     return res.status(201).json(id);
 });
 
-router.get(":id", async (req, res) => {
+router.get("/:id", async (req, res) => {
     const id = req.params.id;
     const teacher = await prisma.teacher.findUnique({
         where: {
@@ -38,7 +38,7 @@ router.get(":id", async (req, res) => {
     return res.status(200).json(teacher);
 });
 
-router.patch(":id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
     const id = req.params.id;
     const newData = req.body;
     const teacher = await prisma.teacher.findUnique({
@@ -57,7 +57,7 @@ router.patch(":id", async (req, res) => {
     return res.status(200).json(updatedTeacher);
 });
 
-router.delete(":id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
     const id = req.params.id;
     const teacher = await prisma.teacher.findUnique({
         where: {

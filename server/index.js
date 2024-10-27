@@ -12,16 +12,6 @@ cloudinary.config({
 const app = express();
 const port = process.env.PORT_NUMBER || 5000;
 
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: "lms-videos",
-        resource_type: "video",
-    },
-});
-
-const upload = multer({ storage });
-
 app.use(cors());
 app.use(express.json());
 
